@@ -7,6 +7,7 @@ import os
 import pickle
 import itertools
 import sys
+from typing import Callable
 
 class Task:
 
@@ -20,12 +21,13 @@ class Task:
 
 class TodoList:
 
-    def __init__(self, displayName: str, id: str, **args):
+    def __init__(self, task_list_gen: Callable[["TodoList"], list[Task]],
+                 displayName: str, id: str, **args):
         
-        self.tasks = []
         self.name = displayName
         self.id = id
         self.args = args
+        self.tasks = task_list_gen(self)
 
     def extend(self, tasks: list[Task]):
         self.tasks.extend(tasks)
@@ -39,14 +41,11 @@ class AzureToDo:
         config = json.load(open("config.json"))
         self.headers = {"Authorization": config['access_token']}
         list_raw = requests.get(self.LISTS_URL, headers=self.headers)
-        self.lists = []
-        for a in progressbar.progressbar(list_raw.json()['value']):
-            l =  TodoList(**a)
-            l.extend(self.get_tasks(l, a['id']))
-            self.lists.append(l)
+        self.lists = [TodoList(self.get_tasks, **a)
+        for a in progressbar.progressbar(list_raw.json()['value'])]
     
-    def get_tasks(self, parent: TodoList, list_id: str) -> list[Task]:
-        tasks_raw = requests.get(self.LISTS_URL + f"/{list_id}/tasks", headers=self.headers)
+    def get_tasks(self, parent: TodoList) -> list[Task]:
+        tasks_raw = requests.get(self.LISTS_URL + f"/{parent.id}/tasks", headers=self.headers)
         return [Task(parent, **t) for t in tasks_raw.json()['value']]
 
 class CLI:
@@ -62,7 +61,9 @@ class CLI:
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         
         while True:
-            self.actions[input("choose action (h for help, Ctrl+C to quit): ")]['a']()
+            fn = self.actions.get(
+                input("choose action (h for help, Ctrl+C to quit): "),
+                {'a': self.help})['a']()
 
     def show_lists(self) -> None:
         for n, l in enumerate(self.todo.lists):
