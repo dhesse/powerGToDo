@@ -6,11 +6,13 @@ import progressbar
 import os
 import pickle
 import itertools
+import sys
 
 class Task:
 
-    def __init__(self, title: str, id: str, createdDateTime: object, **args):
+    def __init__(self, parent: "TodoList", title: str, id: str, createdDateTime: object, **args):
         
+        self.parent = parent
         self.title = title
         self.created = dateutil.parser.parse(createdDateTime)
         self.id = id
@@ -18,12 +20,15 @@ class Task:
 
 class TodoList:
 
-    def __init__(self, tasks: list[Task], displayName: str, id: str, **args):
+    def __init__(self, displayName: str, id: str, **args):
         
-        self.tasks = tasks
+        self.tasks = []
         self.name = displayName
         self.id = id
         self.args = args
+
+    def extend(self, tasks: list[Task]):
+        self.tasks.extend(tasks)
 
 class AzureToDo:
 
@@ -34,11 +39,15 @@ class AzureToDo:
         config = json.load(open("config.json"))
         self.headers = {"Authorization": config['access_token']}
         list_raw = requests.get(self.LISTS_URL, headers=self.headers)
-        self.lists = [TodoList(self.get_tasks(a['id']), **a) for a in progressbar.progressbar(list_raw.json()['value'])]
+        self.lists = []
+        for a in progressbar.progressbar(list_raw.json()['value']):
+            l =  TodoList(**a)
+            l.extend(self.get_tasks(l, a['id']))
+            self.lists.append(l)
     
-    def get_tasks(self, list_id: str) -> list[Task]:
+    def get_tasks(self, parent: TodoList, list_id: str) -> list[Task]:
         tasks_raw = requests.get(self.LISTS_URL + f"/{list_id}/tasks", headers=self.headers)
-        return [Task(**t) for t in tasks_raw.json()['value']]
+        return [Task(parent, **t) for t in tasks_raw.json()['value']]
 
 class CLI:
 
@@ -47,6 +56,7 @@ class CLI:
         self.todo = todo
         self.actions = {'l': {'desc': "Show ToDo lists", 'a': self.show_lists},
                         's': {'desc': "Show stale tasks", 'a': self.stale},
+                        'q': {'desc': "quit", 'a': self.quit},
                         'h': {'desc': "Show help mesage", 'a': self.help}}
         
     def __call__(self, *args: Any, **kwds: Any) -> Any:
@@ -64,10 +74,14 @@ class CLI:
             print(f"{a}: {self.actions[a]['desc']}")
     
     def stale(self) -> None:
-        all_tasks = list(itertools.chain.from_iterable(l.tasks for l in self.todo.lists))
+        N = int(input("How many stale tasks to show (default: 20)") or 20)
+        all_tasks = [t for t in itertools.chain.from_iterable(l.tasks for l in self.todo.lists) if t.args['status'] != 'completed']
         all_tasks.sort(key=lambda t: t.created)
-        for t in all_tasks[:10]:
-            print(f"{t.created} -> {t.title}")
+        for t in all_tasks[:N]:
+            print(f"{t.created} -> {t.title} | {t.parent.name}")
+
+    def quit(self) -> None:
+        sys.exit(0)
 
 if __name__ == "__main__":
 
