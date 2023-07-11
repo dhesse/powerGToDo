@@ -1,7 +1,7 @@
 from typing import Any
 import requests
 import json
-import dateutil
+from dateutil.parser import parse
 import progressbar
 import os
 import pickle
@@ -15,7 +15,7 @@ class Task:
         
         self.parent = parent
         self.title = title
-        self.created = dateutil.parser.parse(createdDateTime)
+        self.created = parse(createdDateTime)
         self.id = id
         self.args = args
 
@@ -28,9 +28,6 @@ class TodoList:
         self.id = id
         self.args = args
         self.tasks = task_list_gen(self)
-
-    def extend(self, tasks: list[Task]):
-        self.tasks.extend(tasks)
 
 class AzureToDo:
 
