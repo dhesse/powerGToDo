@@ -1,0 +1,4 @@
+config.json
+tasks.pickle
+*.pyc
+__pycache__
