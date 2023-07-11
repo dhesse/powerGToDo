@@ -2,3 +2,4 @@ config.json
 tasks.pickle
 *.pyc
 __pycache__
+.vscode
