@@ -26,7 +26,7 @@ class TestTask(TestCase):
 class TestAzureToDo(TestCase):
 
     @patch("powerGToDo.requests.get")
-    @patch("powerGToDo.json.load", new=MagicMock(return_value={'access_token': 'foo123'}))
+    @patch("powerGToDo.get_config", new=MagicMock(return_value={'access_token': 'foo123'}))
     def test_constructor(self, get_mock):
         todo = AzureToDo()
         get_mock.assert_called_with(todo.LISTS_URL, headers={'Authorization': 'foo123'})

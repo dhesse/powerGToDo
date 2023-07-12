@@ -8,6 +8,8 @@ import pickle
 import itertools
 import sys
 
+def get_config():
+    return json.load(open("config.json"))
 
 class Task:
 
@@ -35,7 +37,7 @@ class AzureToDo:
     LISTS_URL = GRAPH_URL + "lists"
 
     def __init__(self):
-        config = json.load(open("config.json"))
+        config = get_config()
         self.headers = {"Authorization": config['access_token']}
         list_raw = requests.get(self.LISTS_URL, headers=self.headers)
         self.lists = [TodoList(self.get_tasks, **a)
