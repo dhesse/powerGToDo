@@ -16,3 +16,5 @@ Get a auth token e.g. in https://developer.microsoft.com/en-us/graph/graph-explo
 - `python powerGToDo.py`
 
 For development purposes, the script will spit out a pickle file so that the todos won't be fetched from the MS Grid API on every run.
+
+[![Unit tests](https://github.com/dhesse/powerGToDo/actions/workflows/test.yml/badge.svg)](https://github.com/dhesse/powerGToDo/actions/workflows/test.yml)
