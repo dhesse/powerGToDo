@@ -44,6 +44,9 @@ class AzureToDo:
     def get_tasks(self, parent: TodoList) -> list[Task]:
         tasks_raw = requests.get(self.LISTS_URL + f"/{parent.id}/tasks", headers=self.headers)
         return [Task(parent, **t) for t in tasks_raw.json()['value']]
+    
+    def forget_token(self) -> None:
+        del self.config['access_token']
 
 class CLI:
 
@@ -88,6 +91,7 @@ if __name__ == "__main__":
         tasks = pickle.load(open(pf, 'rb'))
     else:
         tasks = AzureToDo()
+        tasks.forget_token()
         with open(pf, 'wb') as bf:
             pickle.dump(tasks, bf)
     CLI(tasks)()

@@ -15,3 +15,4 @@ Get a auth token e.g. in https://developer.microsoft.com/en-us/graph/graph-explo
 - Get the token, put it into your `config.json` (use the template to get started).
 - `python powerGToDo.py`
 
+For development purposes, the script will spit out a pickle file so that the todos won't be fetched from the MS Grid API on every run.
