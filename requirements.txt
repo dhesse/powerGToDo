@@ -1,4 +1,3 @@
 requests
-json
-dateutil
+python-dateutil
 progressbar2
