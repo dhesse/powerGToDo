@@ -4,6 +4,7 @@ import json
 from dateutil.parser import parse
 import progressbar
 import os
+import re
 import pickle
 import itertools
 import sys
@@ -20,6 +21,10 @@ class Task:
         self.created = parse(createdDateTime)
         self.id = id
         self.args = args
+    
+    @property
+    def tags(self) -> list[str]:
+        return re.findall(r"\#(\w+)", self.title)
 
 class TodoList:
 

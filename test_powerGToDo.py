@@ -22,6 +22,14 @@ class TestTask(TestCase):
         task = Task(parent, "foo", "bar", "2010-10-20 20:51:52")
         self.assertEqual(task.created,
                          datetime.datetime(2010, 10, 20, 20, 51, 52))
+    
+    def test_tags(self):
+
+        task = Task(MagicMock(), "This task has no tags.", "bar", "2010-10-10")
+        self.assertListEqual(task.tags, [])
+        
+        task = Task(MagicMock(), "This task has #two cool #tags.", "bar", "2010-10-10")
+        self.assertListEqual(task.tags, ["two", "tags"])
 
 class TestAzureToDo(TestCase):
 
