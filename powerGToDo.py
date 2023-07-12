@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 import requests
 import json
 from dateutil.parser import parse
@@ -7,7 +7,7 @@ import os
 import pickle
 import itertools
 import sys
-from typing import Callable
+
 
 class Task:
 
